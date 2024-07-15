@@ -1,0 +1,26 @@
+name: Container Build
+
+on:
+  workflow_call:
+    outputs:
+      IMAGE_PATH:
+        description: "The path of the image created"
+        value: ${{ jobs.build.outputs.image_output }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      image_output: ${{ steps.set_output.outputs.IMAGE_PATH }}
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          persist-credentials: false # otherwise, the token used is the GITHUB_TOKEN, instead of your personal token
+          fetch-depth: 0 # otherwise, you will fail to push refs to dest repo
+          ref: ${{github.event.pull_request.head.sha}}
+
+      - name: Set Output
+        id: set_output
+        run: echo "IMAGE_PATH=test-output" >> $GITHUB_OUTPUT
